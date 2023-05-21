@@ -1,0 +1,32 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-testnew-frontend-nextjs
+  namespace: develop-frontend
+  labels:
+    name: develop-frontend
+  annotations:
+    alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_301"}}'
+    alb.ingress.kubernetes.io/group.name: ingress-test-frontend
+    alb.ingress.kubernetes.io/healthcheck-path: /
+    alb.ingress.kubernetes.io/actions.redirect-to-eks: >
+      {"type":"redirect","redirectConfig":{"host":"oudesite.demo.com","path":"/eks/","port":"443","protocol":"HTTPS","query":"k=v","statusCode":"HTTP_302"}}
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}, {"HTTP":80}]'
+    alb.ingress.kubernetes.io/conditions: '[{"Field": "host-header", "Values": ["develop-inress-test.snaptec.co"]}]'
+    alb.ingress.kubernetes.io/redirect: '{"host": "www.develop-inress-test.snaptec.co", "path": "/$1", "port": "443", "protocol": "HTTPS", "status": "HTTP_301"}'
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    kubernetes.io/ingress.class: alb
+    meta.helm.sh/release-name: ingress-test-frontend
+    meta.helm.sh/release-namespace: develop-frontend
+spec:
+  ingressClassName: alb
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Exact
+            backend:
+              service:
+                name: redirect-to-eks
+                port:
+                  name: use-annotation
