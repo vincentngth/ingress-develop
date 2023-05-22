@@ -8,7 +8,7 @@ metadata:
   annotations:
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/group.name: ingress-test-frontend
-    # Redirect from HTTP sang HTTPS
+    # Redirect from HTTP sang HTTPS, lay arn tu ACM sau khi register ten mien ingress-develop.snapdev.co
     alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:433909495486:certificate/d28c06a1-d00b-46d7-bcde-1556b9867de5
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
     alb.ingress.kubernetes.io/ssl-redirect: '443'
@@ -16,7 +16,10 @@ metadata:
     alb.ingress.kubernetes.io/actions.redirect-to-eks: >
       {"type":"redirect","redirectConfig":{"host":"another-ingress.snaptec.co","path":"/","port":"443","protocol":"HTTPS","query":"k=v","statusCode":"HTTP_302"}}
     # Redirect from www to non-www
-    nginx.ingress.kubernetes.io/from-to-www-redirect: "true"
+    alb.ingress.kubernetes.io/actions.redirect-to-non-www: >
+    {"Type":"redirect","RedirectConfig":{"Host":"ingress-develop.snapdev.co","Port":"443","Protocol":"HTTPS","StatusCode":"HTTP_302"}}
+    meta.helm.sh/release-name: ingress-develop
+    meta.helm.sh/release-namespace: develop-frontend
     kubernetes.io/ingress.class: alb
 spec:
   rules:
@@ -30,3 +33,10 @@ spec:
                 name: redirect-to-eks
                 port:
                   name: use-annotation
+    - host: www.ingress-develop.snapdev.co
+    - http:
+        paths:
+          - path: /*
+            backend:
+              serviceName: redirect-to-non-www
+              servicePort: use-annotation 
