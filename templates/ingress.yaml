@@ -1,15 +1,16 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: ingress-testnew-frontend-nextjs
+  name: ingress-test-new-frontend-nextjs
   namespace: develop-frontend
   labels:
     name: develop-frontend
   annotations:
     alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/group.name: ingress-test-frontend
     # Redirect from HTTP sang HTTPS, lay arn tu ACM sau khi register ten mien ingress-develop.snapdev.co
-    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:433909495486:certificate/d28c06a1-d00b-46d7-bcde-1556b9867de5
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:389224572829:certificate/5fdddfd4-0566-4aba-aaf1-3ce3b6b138b5
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
     alb.ingress.kubernetes.io/ssl-redirect: '443'
     # Redirect from 1 domain to another domain
@@ -17,7 +18,7 @@ metadata:
       {"type":"redirect","redirectConfig":{"host":"another-ingress.snaptec.co","path":"/","port":"443","protocol":"HTTPS","query":"k=v","statusCode":"HTTP_302"}}
     # Redirect from www to non-www
     alb.ingress.kubernetes.io/actions.redirect-to-non-www: >
-    {"Type":"redirect","RedirectConfig":{"Host":"ingress-develop.snapdev.co","Port":"443","Protocol":"HTTPS","StatusCode":"HTTP_302"}}
+      {"Type":"redirect","RedirectConfig":{"host":"ingress-develop.snapdev.co","Port":"443","Protocol":"HTTPS","StatusCode":"HTTP_302"}}
     meta.helm.sh/release-name: ingress-develop
     meta.helm.sh/release-namespace: develop-frontend
     kubernetes.io/ingress.class: alb
@@ -37,6 +38,9 @@ spec:
     - http:
         paths:
           - path: /*
+            pathType: Prefix
             backend:
-              serviceName: redirect-to-non-www
-              servicePort: use-annotation 
+              service:
+                name: redirect-to-non-www
+                port: 
+                  name: use-annotation 
