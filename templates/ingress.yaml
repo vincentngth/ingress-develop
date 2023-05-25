@@ -27,13 +27,35 @@ metadata:
     alb.ingress.kubernetes.io/actions.redirect-to-eks: >
       {"type":"redirect","redirectConfig":{"host":"another-ingress.snaptec.co","path":"/","port":"443","protocol":"HTTPS","query":"k=v","statusCode":"HTTP_302"}}
     # Redirect from www to non-www
+    alb.ingress.kubernetes.io/actions.redirect-om-to-non-www: >
+      {"Type":"redirect","RedirectConfig":{"host":"om.amanonet.top","Port":"443","Protocol":"HTTPS","StatusCode":"HTTP_301"}}
     alb.ingress.kubernetes.io/actions.redirect-to-non-www: >
-      {"Type":"redirect","RedirectConfig":{"host":"ingress-develop.snapdev.co","Port":"443","Protocol":"HTTPS","StatusCode":"HTTP_302"}}
+      {"Type":"redirect","RedirectConfig":{"host":"amanonet.top","Port":"443","Protocol":"HTTPS","StatusCode":"HTTP_301"}}
     meta.helm.sh/release-name: ingress-develop
     meta.helm.sh/release-namespace: develop-frontend
     kubernetes.io/ingress.class: alb
 spec:
   rules:
+    - host: www.om.amanonet.top
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: redirect-om-to-non-www
+                port: 
+                  name: use-annotation
+    - host: www.amanonet.top
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: redirect-to-non-www
+                port: 
+                  name: use-annotation
     - host: om.amanonet.top
       http:
         paths:
@@ -52,6 +74,16 @@ spec:
             backend:
               service:
                 name: app2-nginx-nodeport-service
+                port: 
+                  number: 80
+    - host: amanonet.top
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: app1-nginx-nodeport-service
                 port: 
                   number: 80
   tls:
