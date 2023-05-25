@@ -97,5 +97,3 @@ spec:
   tls:
   - hosts:
     - "*.amanonet.top"
-    - "www.om.amanonet.top"
-    - "www.ar.amanonet.top"
